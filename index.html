@@ -12,7 +12,7 @@
       <h1>Điền khung → Xuất PDF (tải về)</h1>
       <p class="sub">
         Web dùng <b>template.docx</b> (chính là file Word bạn gửi) làm mẫu, thay placeholder <code>(1)…(17)</code>
-        rồi xuất PDF tải về. (Không hiện màn “Xem trước”.)
+        rồi xuất PDF tải về. (Trên Cốc Cốc sẽ dùng chế độ In/Save as PDF để tránh treo).
       </p>
     </header>
 
@@ -57,6 +57,7 @@
 
         <div class="row">
           <button id="btnGenerate" type="submit">Tạo PDF</button>
+          <button id="btnTryAuto" type="button">Tải PDF (thử)</button>
           <button id="btnPrintPdf" type="button">In ra PDF (Print)</button>
           <button id="btnFillDemo" type="button">Điền demo</button>
           <span id="msg" class="status"></span>
@@ -67,7 +68,7 @@
     <footer class="footer">
       <p>
         Ghi chú: GitHub Pages là web tĩnh nên PDF được tạo theo cách <b>DOCX → HTML (mammoth) → PDF (html2pdf)</b>.
-        Nếu bạn cần PDF giống Word 100% (giữ nguyên layout/phông/bảng), bắt buộc phải có <b>server</b> convert (LibreOffice/OnlyOffice). <span class="ver">ver 0.5</span></p>
+        Nếu bạn cần PDF giống Word 100% (giữ nguyên layout/phông/bảng), bắt buộc phải có <b>server</b> convert (LibreOffice/OnlyOffice). <span class="ver">ver 0.6</span></p>
     </footer>
   </div>
 

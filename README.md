@@ -21,4 +21,4 @@ Upload vào root:
 - template.docx
 
 ---
-ver 0.5: thêm timeout + hiển thị tiến trình + fallback In ra PDF (print) để không bị treo/blank trên Cốc Cốc.
+ver 0.6: nút Tạo PDF dùng Print/Save as PDF (ổn định trên Cốc Cốc). Có nút 'Tải PDF (thử)' cho Chrome/Edge.

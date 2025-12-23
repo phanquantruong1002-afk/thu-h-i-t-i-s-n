@@ -1,5 +1,5 @@
 // app.js
-const APP_VERSION = "0.5";
+const APP_VERSION = "0.6";
 
 // Không hiện "Xem trước" trên UI.
 // Khi bấm Tạo PDF:
@@ -323,6 +323,7 @@ function printToPdf(filename){
       const filledAb = await buildFilledDocxArrayBuffer(templateArrayBuffer, map);
       const html = await withTimeout(docxToHtml(filledAb), 20000, "DOCX->HTML");
       await withTimeout(renderHidden(html), 8000, "Render");
+      setOverlayText("Đang mở hộp thoại In…");
       showOverlay(false);
       printToPdf(outName);
     } catch(e){
@@ -332,7 +333,30 @@ function printToPdf(filename){
     }
   });
 
-  $("form").addEventListener("submit", async (ev) => {
+  
+  $("btnTryAuto").addEventListener("click", async ()=>{
+    try{
+      _cancelled=false;
+      showOverlay(true);
+      setOverlayText("Đang chuẩn bị…");
+      if (!templateArrayBuffer) throw new Error("Chưa có template.");
+      const { map, outName } = getFormMapAndName();
+      setOverlayText("Đang áp placeholder…");
+      const filledAb = await buildFilledDocxArrayBuffer(templateArrayBuffer, map);
+      const html = await withTimeout(docxToHtml(filledAb), 20000, "DOCX->HTML");
+      await withTimeout(renderHidden(html), 8000, "Render");
+      setOverlayText("Đang mở hộp thoại In…");
+      await exportPdf(outName);
+      showOverlay(false);
+      msg("Đã mở hộp thoại In. Chọn Save as PDF để tải.");
+    } catch(e){
+      console.error(e);
+      msg("Lỗi tải PDF tự động: " + (e?.message || e));
+      showOverlay(false);
+    }
+  });
+
+$("form").addEventListener("submit", async (ev) => {
     ev.preventDefault();
     try {
       setBusy(true);
@@ -348,16 +372,11 @@ function printToPdf(filename){
 
       const html = await withTimeout(docxToHtml(filledAb), 20000, "DOCX->HTML");
       await withTimeout(renderHidden(html), 8000, "Render");
+      setOverlayText("Đang mở hộp thoại In…");
 
-      try {
-      await exportPdf(outName);
-    } catch (e) {
-      console.warn(e);
-      msg("Auto tải PDF lỗi/treo. Đang mở chế độ In ra PDF…");
-      // Fallback: in ra PDF (Save as PDF)
+      showOverlay(false);
       printToPdf(outName);
-    }
-      msg("Xong: đã tải PDF");
+      msg("Đã mở hộp thoại In. Chọn Save as PDF để tải.");
     } catch (e) {
       console.error(e);
       msg("Lỗi: " + (e?.message || e));
