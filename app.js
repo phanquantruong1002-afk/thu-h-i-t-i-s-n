@@ -1,17 +1,15 @@
 // app.js
-// Tạo file DOCX từ template bằng cách:
-// 1) Đọc template (.docx) => PizZip
-// 2) Duyệt các file XML trong thư mục word/
-// 3) Thay thế chuỗi (1)...(17) => giá trị người dùng nhập
-// 4) Nén lại => Blob => tải xuống
+// Mục tiêu: bấm "Tạo file PDF" -> xuất PDF.
+// Cách làm (chạy tĩnh trên GitHub Pages):
+// 1) Dùng template.docx, thay placeholder (1)...(17) => tạo DOCX blob (PizZip)
+// 2) Render DOCX blob ra HTML bằng docx-preview
+// 3) Dùng html2pdf.js để xuất PDF từ HTML vừa render
 //
-// Lưu ý kỹ thuật:
-// - DOCX là ZIP. Nội dung văn bản nằm trong word/document.xml, header*.xml, footer*.xml...
-// - Nếu placeholder bị Word tách run (vd “(” “1” “)”), replace theo chuỗi sẽ fail.
-//   Với template hiện tại (file edit.docx) placeholder đang ở dạng chuỗi liền nên OK. fileciteturn1file0L5-L16
+// Lưu ý quan trọng:
+// - DOCX placeholder phải là chuỗi LIỀN (vd "(12)") trong file XML.
+//   Nếu Word tách ra thành nhiều đoạn (run) thì replace theo chuỗi sẽ không ăn.
 
 let templateArrayBuffer = null; // cache template hiện tại
-
 const $ = (id) => document.getElementById(id);
 const msg = (s) => { $("msg").textContent = s || ""; };
 
@@ -40,11 +38,8 @@ function loadTemplateFromFile(file) {
 }
 
 function getFormData() {
-  const form = $("form");
-  const fd = new FormData(form);
+  const fd = new FormData($("form"));
 
-  // Map placeholder => giá trị
-  // (1)...(3) là ngày/tháng/năm ở dòng “Hà Nội, ngày ... tháng ... năm ...” fileciteturn1file0L5-L16
   const data = {
     "(1)": fd.get("d1"),
     "(2)": fd.get("d2"),
@@ -64,16 +59,16 @@ function getFormData() {
     "(17)": fd.get("p17"),
   };
 
-  const outName = (fd.get("outName") || "Thong-bao-thu-hoi-tai-san.docx").trim();
+  let outName = (fd.get("outName") || "Thong-bao-thu-hoi-tai-san.pdf").trim();
+  if (!outName.toLowerCase().endsWith(".pdf")) outName += ".pdf";
   return { data, outName };
 }
 
 function replaceInZip(zip, replacements) {
-  // Chỉ thay trong các XML chính của Word
+  // Thay trong các XML thuộc "word/" (document, header, footer, ...)
   const targets = Object.keys(zip.files).filter((name) =>
     name.startsWith("word/") &&
-    (name.endsWith(".xml")) &&
-    // bỏ qua theme/styles/settings nếu không cần
+    name.endsWith(".xml") &&
     !name.startsWith("word/theme/")
   );
 
@@ -90,31 +85,60 @@ function replaceInZip(zip, replacements) {
 
     let changed = false;
     for (const [ph, value] of Object.entries(replacements)) {
-      // thay toàn bộ placeholder
       const safe = xmlEscape(value ?? "");
       if (xml.includes(ph)) {
         xml = xml.split(ph).join(safe);
         changed = true;
       }
     }
-    if (changed) {
-      zip.file(name, xml);
-    }
+    if (changed) zip.file(name, xml);
   }
 }
 
-function generateDocx(arrayBuffer, replacements) {
+function generateDocxBlob(arrayBuffer, replacements) {
   const zip = new PizZip(arrayBuffer);
   replaceInZip(zip, replacements);
 
-  // Xuất ra docx mới
   return zip.generate({
     type: "blob",
     mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   });
 }
 
-// ====== UI wiring ======
+async function renderDocxToHtml(docxBlob, container) {
+  container.innerHTML = ""; // clear
+  const ab = await docxBlob.arrayBuffer();
+
+  // docx-preview API: docx.renderAsync(arrayBuffer, container, styleContainer?, options?)
+  // Một số phiên bản export là window.docx.
+  const api = window.docx;
+  if (!api || !api.renderAsync) throw new Error("Không load được thư viện docx-preview");
+
+  // options: useMathML, ignoreWidth, ignoreHeight... (để mặc định cho ổn)
+  await api.renderAsync(ab, container, container, { inWrapper: true });
+}
+
+async function exportHtmlToPdf(container, filename) {
+  // html2pdf options
+  const opt = {
+    margin:       [10, 10, 10, 10], // mm
+    filename:     filename,
+    image:        { type: "jpeg", quality: 0.98 },
+    html2canvas:  { scale: 2, useCORS: true },
+    jsPDF:        { unit: "mm", format: "a4", orientation: "portrait" }
+  };
+
+  // html2pdf() trả Promise
+  await html2pdf().set(opt).from(container).save();
+}
+
+function setBusy(isBusy) {
+  $("btnGenerate").disabled = isBusy;
+  $("btnFillDemo").disabled = isBusy;
+  $("btnUseDefault").disabled = isBusy;
+  $("templateFile").disabled = isBusy;
+}
+
 (async function init() {
   try {
     await loadDefaultTemplate();
@@ -144,8 +168,10 @@ function generateDocx(arrayBuffer, replacements) {
   });
 
   $("btnFillDemo").addEventListener("click", () => {
-    // Dữ liệu demo lấy theo “file mau.docx” fileciteturn1file3L13-L50 fileciteturn1file4L1-L4
-    const set = (name, v) => ($(`form`).querySelector(`[name="${name}"]`).value = v);
+    const form = $("form");
+    const set = (name, v) => (form.querySelector(`[name="${name}"]`).value = v);
+
+    // Demo (bạn có thể sửa cho đúng dữ liệu thật của bạn)
     set("d1", "05"); set("d2", "11"); set("d3", "2025");
     set("p4", "Nguyễn Văn Thanh");
     set("p5", "Kv Lân Thạnh 1, Phường Trung Kiên, Quận Thốt Nốt, Thành Phố Cần Thơ");
@@ -160,7 +186,8 @@ function generateDocx(arrayBuffer, replacements) {
     set("p15", "Lê Phước Hữu");
     set("p16", "Trưởng nhóm Khai thác tài sản");
     set("p17", "0913788134");
-    set("outName", "Thong-bao-thu-hoi-tai-san.docx");
+    set("outName", "Thong-bao-thu-hoi-tai-san.pdf");
+
     msg("Đã điền demo");
   });
 
@@ -174,14 +201,27 @@ function generateDocx(arrayBuffer, replacements) {
     }
 
     const { data, outName } = getFormData();
+    const renderArea = $("renderArea");
 
     try {
-      const blob = generateDocx(templateArrayBuffer, data);
-      saveAs(blob, outName);
-      msg("Xong: đã tải file DOCX");
+      setBusy(true);
+      msg("Đang tạo DOCX…");
+      const docxBlob = generateDocxBlob(templateArrayBuffer, data);
+
+      msg("Đang render DOCX…");
+      await renderDocxToHtml(docxBlob, renderArea);
+
+      msg("Đang xuất PDF…");
+      await exportHtmlToPdf(renderArea, outName);
+
+      msg("Xong: đã tải PDF");
     } catch (e) {
       console.error(e);
-      msg("Lỗi tạo DOCX. (Thường do template bị tách placeholder hoặc file không đúng định dạng)");
+      msg("Lỗi xuất PDF. Thử đổi template khác hoặc kiểm tra placeholder bị tách run trong Word.");
+    } finally {
+      setBusy(false);
+      // tránh giữ DOM nặng
+      renderArea.innerHTML = "";
     }
   });
 })();

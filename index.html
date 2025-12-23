@@ -3,33 +3,22 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Tạo Thông Báo (từ mẫu .docx)</title>
+  <title>Tạo văn bản (PDF) từ mẫu DOCX</title>
   <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
-  <!--
-    ỨNG DỤNG WEB TĨNH (GitHub Pages được):
-    - Bạn nhập dữ liệu vào form
-    - App sẽ lấy template.docx (mẫu có placeholder (1)...(17)) và thay thế rồi tải về file .docx mới
-
-    Mẫu placeholder theo file edit.docx:
-    (1)(2)(3): ngày/tháng/năm tại "Hà Nội, ngày ... tháng ... năm ..."  fileciteturn1file0L5-L16
-    (4)(5)(6)(7): người nhận, địa chỉ, số HĐ, ngày HĐ              fileciteturn1file0L39-L51
-    (9)-(14): thông tin tài sản/đăng ký xe                         fileciteturn1file1L1-L4
-    (15)-(17): người liên hệ, chức vụ, di động                     fileciteturn1file2L11-L18
-  -->
   <div class="container">
     <header class="header">
-      <h1>Tạo văn bản từ mẫu (DOCX)</h1>
+      <h1>Tạo văn bản từ mẫu (xuất PDF)</h1>
       <p class="sub">
-        Dùng mẫu <b>template.docx</b> (giống “file edit.docx”). Khi bấm <b>Tạo file</b>, web sẽ tải về docx mới (giống “file mau.docx”). fileciteturn1file3L13-L50
+        Nhập dữ liệu → bấm <b>Tạo file PDF</b> → tải về PDF. Mặc định dùng <b>template.docx</b> trong repo (giống file “edit” của bạn).
       </p>
     </header>
 
     <section class="card">
       <h2>1) Chọn mẫu (tuỳ chọn)</h2>
       <p class="hint">
-        Mặc định web dùng <code>template.docx</code> trong repo. Nếu bạn có mẫu khác (cũng dùng (1)...(17)) thì chọn ở đây.
+        Nếu bạn có mẫu khác (cũng dùng placeholder <code>(1)</code>...<code>(17)</code>) thì chọn ở đây.
       </p>
       <input id="templateFile" type="file" accept=".docx" />
       <div class="row">
@@ -48,29 +37,29 @@
           <label>(3) Năm <input name="d3" placeholder="2025" required></label>
 
           <label>(4) Kính gửi (Ông/Bà) <input name="p4" placeholder="Nguyễn Văn Thanh" required></label>
-          <label class="span2">(5) Địa chỉ <input name="p5" placeholder="Kv Lân Thạnh 1, ..." required></label>
+          <label class="span2">(5) Địa chỉ <input name="p5" placeholder="..." required></label>
 
           <label>(6) Số hợp đồng <input name="p6" placeholder="20285167926" required></label>
           <label>(7) Ngày hợp đồng (dd/mm/yyyy) <input name="p7" placeholder="24/02/2022" required></label>
 
-          <label class="span2">(9) Tài sản (mô tả xe) <input name="p9" placeholder="HONDA VariO - Click (Nhập khẩu) 150cc Fi 2020" required></label>
-          <label>(10) Số khung <input name="p10" placeholder="4125LK052645" required></label>
-          <label>(11) Số máy <input name="p11" placeholder="KF41E2056854" required></label>
-          <label>(12) Biển số <input name="p12" placeholder="65F1-645.46" required></label>
+          <label class="span2">(9) Tài sản (mô tả xe) <input name="p9" placeholder="..." required></label>
+          <label>(10) Số khung <input name="p10" placeholder="..." required></label>
+          <label>(11) Số máy <input name="p11" placeholder="..." required></label>
+          <label>(12) Biển số <input name="p12" placeholder="..." required></label>
 
-          <label>(13) Số đăng ký xe <input name="p13" placeholder="058656" required></label>
-          <label>(14) Ngày cấp đăng ký (dd/mm/yyyy) <input name="p14" placeholder="04/12/2020" required></label>
+          <label>(13) Số đăng ký xe <input name="p13" placeholder="..." required></label>
+          <label>(14) Ngày cấp đăng ký (dd/mm/yyyy) <input name="p14" placeholder="..." required></label>
 
-          <label>(15) Người liên hệ <input name="p15" placeholder="Lê Phước Hữu" required></label>
-          <label class="span2">(16) Chức vụ <input name="p16" placeholder="Trưởng nhóm Khai thác tài sản" required></label>
-          <label>(17) Di động <input name="p17" placeholder="0913788134" required></label>
+          <label>(15) Người liên hệ <input name="p15" placeholder="..." required></label>
+          <label class="span2">(16) Chức vụ <input name="p16" placeholder="..." required></label>
+          <label>(17) Di động <input name="p17" placeholder="..." required></label>
 
-          <label class="span2">Tên file xuất ra <input name="outName" placeholder="Thong-bao-thu-hoi-tai-san.docx"></label>
+          <label class="span2">Tên file PDF xuất ra <input name="outName" placeholder="Thong-bao-thu-hoi-tai-san.pdf"></label>
         </div>
 
         <div class="row">
-          <button id="btnGenerate" type="submit">Tạo file DOCX</button>
-          <button id="btnFillDemo" type="button">Điền demo (giống file mau)</button>
+          <button id="btnGenerate" type="submit">Tạo file PDF</button>
+          <button id="btnFillDemo" type="button">Điền demo</button>
           <span id="msg" class="status"></span>
         </div>
       </form>
@@ -78,16 +67,26 @@
 
     <footer class="footer">
       <p>
-        Lưu ý: App thay thế trực tiếp chuỗi <code>(1)...(17)</code> trong các file XML của DOCX.
-        Nếu bạn sửa mẫu và làm placeholder bị tách lẻ ký tự (vd “(” “1” “)”), app có thể không thay được.
+        Ghi chú: Web này chạy tĩnh (GitHub Pages). Vì vậy nó xuất PDF bằng cách
+        <b>render DOCX ra HTML trong trình duyệt</b> rồi “in” ra PDF.
+        Độ giống Word có thể lệch nhẹ tuỳ font/trình duyệt.
       </p>
     </footer>
   </div>
 
+  <!-- vùng render DOCX (ẩn) để xuất PDF -->
+  <div id="renderArea" class="renderArea" aria-hidden="true"></div>
+
   <!-- PizZip: đọc/ghi docx (docx là file zip) -->
   <script src="https://unpkg.com/pizzip@3.1.5/dist/pizzip.min.js"></script>
-  <!-- FileSaver: tải blob về máy -->
+  <!-- FileSaver: tải blob về máy (dùng khi bạn muốn bật xuất DOCX thêm) -->
   <script src="https://unpkg.com/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+
+  <!-- docx-preview: render docx => HTML -->
+  <script src="https://unpkg.com/docx-preview@0.3.2/dist/docx-preview.min.js"></script>
+
+  <!-- html2pdf: HTML => PDF -->
+  <script src="https://unpkg.com/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
 
   <script src="./app.js"></script>
 </body>

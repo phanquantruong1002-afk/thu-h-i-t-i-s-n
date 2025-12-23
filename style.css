@@ -23,3 +23,20 @@ code { background:#0f1117; padding:2px 6px; border:1px solid var(--line); border
   .grid { grid-template-columns: 1fr; }
   .span2 { grid-column: auto; }
 }
+
+
+/* renderArea: chứa HTML render từ DOCX để xuất PDF (ẩn khỏi UI) */
+.renderArea {
+  position: fixed;
+  left: -99999px;
+  top: 0;
+  width: 794px; /* gần A4 @ 96dpi (xấp xỉ) */
+  background: white;
+  color: black;
+  padding: 20px;
+}
+
+/* docx-preview thường tạo các element có class .docx ... */
+.renderArea .docx-wrapper {
+  background: white !important;
+}
