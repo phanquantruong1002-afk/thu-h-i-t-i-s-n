@@ -109,13 +109,17 @@ async function renderDocxToHtml(docxBlob, container) {
   container.innerHTML = ""; // clear
   const ab = await docxBlob.arrayBuffer();
 
-  // docx-preview API: docx.renderAsync(arrayBuffer, container, styleContainer?, options?)
-  // Một số phiên bản export là window.docx.
-  const api = window.docx;
-  if (!api || !api.renderAsync) throw new Error("Không load được thư viện docx-preview");
+  // Mammoth API: mammoth.convertToHtml({arrayBuffer})
+  if (!window.mammoth || !window.mammoth.convertToHtml) {
+    throw new Error("Không load được thư viện mammoth (DOCX->HTML)");
+  }
 
-  // options: useMathML, ignoreWidth, ignoreHeight... (để mặc định cho ổn)
-  await api.renderAsync(ab, container, container, { inWrapper: true });
+  const result = await window.mammoth.convertToHtml({ arrayBuffer: ab }, {
+    // styleMap có thể tuỳ biến thêm nếu muốn giống Word hơn
+  });
+
+  // Mammoth trả về HTML tương đối "sạch"
+  container.innerHTML = result.value || "";
 }
 
 async function exportHtmlToPdf(container, filename) {

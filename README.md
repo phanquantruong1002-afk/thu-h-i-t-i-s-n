@@ -22,7 +22,7 @@ Web tĩnh: nhập dữ liệu → thay placeholder `(1)...(17)` trong **template
 GitHub Pages là web tĩnh (không có server để chạy LibreOffice).
 Vì vậy PDF được tạo theo pipeline:
 1) Tạo DOCX blob bằng cách replace placeholder trong XML (PizZip)
-2) Render DOCX → HTML trong trình duyệt (docx-preview)
+2) Render DOCX → HTML trong trình duyệt (mammoth)
 3) HTML → PDF (html2pdf.js)
 
 Độ giống Word có thể lệch nhẹ tuỳ font/trình duyệt.
