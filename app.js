@@ -1,5 +1,5 @@
 // app.js
-const APP_VERSION = "0.2";
+const APP_VERSION = "0.3";
 
 // Không hiện "Xem trước" trên UI.
 // Khi bấm Tạo PDF:
@@ -140,14 +140,53 @@ async function exportPdf(filename) {
     margin:       [10, 10, 10, 10],
     filename:     filename,
     image:        { type: "jpeg", quality: 0.98 },
-    html2canvas:  { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
+    html2canvas:  {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: "#ffffff",
+      logging: false,
+      // Cốc Cốc/Chromium đôi khi chụp lỗi khi element position:fixed; ta thử scrollY=0
+      scrollY: 0,
+      scrollX: 0
+    },
     jsPDF:        { unit: "mm", format: "a4", orientation: "portrait" },
     pagebreak:    { mode: ["css", "legacy"] }
   };
 
-  await html2pdf().set(opt).from(host).save();
-  // clear để nhẹ máy
-  host.innerHTML = "";
+  // Timeout chống "đứng mãi" (đặc biệt trên Cốc Cốc)
+  const timeoutMs = 45000;
+  const timeout = new Promise((_, reject) =>
+    setTimeout(() => reject(new Error("Timeout xuất PDF (45s). Thử lại hoặc dùng Chrome/Edge.")), timeoutMs)
+  );
+
+  // html2pdf worker
+  const task = (async () => {
+    // Một số bản html2pdf hỗ trợ outputPdf('blob')
+    try {
+      const blob = await html2pdf().set(opt).from(host).outputPdf("blob");
+      downloadBlob(blob, filename);
+      return;
+    } catch (e) {
+      // Fallback: toPdf().get('pdf') -> blob
+      const worker = html2pdf().set(opt).from(host).toPdf();
+      const pdf = await worker.get("pdf");
+      const blob = pdf.output("blob");
+      downloadBlob(blob, filename);
+    }
+  })();
+
+  await Promise.race([task, timeout]);
+}
+
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
 }
 
 // ===== UI wiring =====

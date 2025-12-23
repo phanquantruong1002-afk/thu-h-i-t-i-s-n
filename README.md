@@ -21,4 +21,4 @@ Upload vào root:
 - template.docx
 
 ---
-ver 0.2: sửa lỗi PDF trắng bằng overlay + exportHost không opacity 0.
+ver 0.3: dùng outputPdf(blob) + anchor download + timeout để tránh treo/blank trên Cốc Cốc.
