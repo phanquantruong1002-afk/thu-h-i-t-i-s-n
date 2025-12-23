@@ -1,5 +1,5 @@
 // app.js
-const APP_VERSION = "0.6";
+const APP_VERSION = "0.7";
 
 // Không hiện "Xem trước" trên UI.
 // Khi bấm Tạo PDF:
@@ -51,7 +51,7 @@ function xmlEscape(str) {
 }
 
 async function loadDefaultTemplate() {
-  const res = await fetch("./template.docx", { cache: "no-store" });
+  const res = await fetch("./template.docx?v=" + APP_VERSION, { cache: "no-store" });
   if (!res.ok) throw new Error("Không tải được template.docx. Kiểm tra file nằm ở root repo.");
   templateArrayBuffer = await res.arrayBuffer();
   $("templateStatus").textContent = "Đang dùng: template.docx";

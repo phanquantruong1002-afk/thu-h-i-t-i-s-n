@@ -22,3 +22,6 @@ Upload vào root:
 
 ---
 ver 0.6: nút Tạo PDF dùng Print/Save as PDF (ổn định trên Cốc Cốc). Có nút 'Tải PDF (thử)' cho Chrome/Edge.
+
+---
+ver 0.7: thêm cache-busting (?v=0.7) cho style/app/template để GitHub Pages cập nhật ngay, tránh bị cache.
