@@ -3,33 +3,31 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Tạo văn bản (PDF) từ mẫu DOCX</title>
+  <title>Điền khung → Xuất PDF</title>
   <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
   <div class="container">
     <header class="header">
-      <h1>Tạo văn bản từ mẫu (xuất PDF)</h1>
+      <h1>Điền khung → Xuất PDF (tải về)</h1>
       <p class="sub">
-        Nhập dữ liệu → bấm <b>Tạo file PDF</b> → tải về PDF. Mặc định dùng <b>template.docx</b> trong repo (giống file “edit” của bạn).
+        Web dùng <b>template.docx</b> (chính là file Word bạn gửi) làm mẫu, thay placeholder <code>(1)…(17)</code>
+        rồi xuất PDF tải về. (Không hiện màn “Xem trước”.)
       </p>
     </header>
 
     <section class="card">
-      <h2>1) Chọn mẫu (tuỳ chọn)</h2>
-      <p class="hint">
-        Nếu bạn có mẫu khác (cũng dùng placeholder <code>(1)</code>...<code>(17)</code>) thì chọn ở đây.
-      </p>
-      <input id="templateFile" type="file" accept=".docx" />
+      <h2>0) Chọn mẫu (tuỳ chọn)</h2>
+      <p class="hint">Mặc định dùng <code>template.docx</code> trong repo. Nếu muốn dùng mẫu khác, chọn ở đây.</p>
       <div class="row">
-        <button id="btnUseDefault" type="button">Dùng template.docx mặc định</button>
+        <input id="templateFile" type="file" accept=".docx" />
+        <button id="btnUseDefault" type="button">Dùng template.docx</button>
         <span id="templateStatus" class="status">Đang dùng: template.docx</span>
       </div>
     </section>
 
     <section class="card">
-      <h2>2) Nhập dữ liệu</h2>
-
+      <h2>1) Các khung điền</h2>
       <form id="form">
         <div class="grid">
           <label>(1) Ngày <input name="d1" placeholder="05" required></label>
@@ -48,17 +46,17 @@
           <label>(12) Biển số <input name="p12" placeholder="..." required></label>
 
           <label>(13) Số đăng ký xe <input name="p13" placeholder="..." required></label>
-          <label>(14) Ngày cấp đăng ký (dd/mm/yyyy) <input name="p14" placeholder="..." required></label>
+          <label>(14) Ngày cấp đăng ký <input name="p14" placeholder="..." required></label>
 
           <label>(15) Người liên hệ <input name="p15" placeholder="..." required></label>
           <label class="span2">(16) Chức vụ <input name="p16" placeholder="..." required></label>
           <label>(17) Di động <input name="p17" placeholder="..." required></label>
 
-          <label class="span2">Tên file PDF xuất ra <input name="outName" placeholder="Thong-bao-thu-hoi-tai-san.pdf"></label>
+          <label class="span2">Tên file PDF <input name="outName" value="Thong-bao-thu-hoi-tai-san.pdf" /></label>
         </div>
 
         <div class="row">
-          <button id="btnGenerate" type="submit">Tạo file PDF</button>
+          <button id="btnGenerate" type="submit">Tạo PDF</button>
           <button id="btnFillDemo" type="button">Điền demo</button>
           <span id="msg" class="status"></span>
         </div>
@@ -67,24 +65,18 @@
 
     <footer class="footer">
       <p>
-        Ghi chú: Web này chạy tĩnh (GitHub Pages). Vì vậy nó xuất PDF bằng cách
-        <b>render DOCX ra HTML trong trình duyệt</b> rồi “in” ra PDF.
-        Độ giống Word có thể lệch nhẹ tuỳ font/trình duyệt.
+        Ghi chú: GitHub Pages là web tĩnh nên PDF được tạo theo cách <b>DOCX → HTML (mammoth) → PDF (html2pdf)</b>.
+        Nếu bạn cần PDF giống Word 100% (giữ nguyên layout/phông/bảng), bắt buộc phải có <b>server</b> convert (LibreOffice/OnlyOffice).
       </p>
     </footer>
   </div>
 
-  <!-- vùng render DOCX (ẩn) để xuất PDF -->
-  <div id="renderArea" class="renderArea" aria-hidden="true"></div>
+  <!-- Vùng render ẩn để xuất PDF (không hiển thị) -->
+  <div id="exportHost" class="exportHost" aria-hidden="true"></div>
 
-  <!-- PizZip: đọc/ghi docx (docx là file zip) -->
+  <!-- Libs -->
   <script src="https://unpkg.com/pizzip@3.1.5/dist/pizzip.min.js"></script>
-  <!-- FileSaver: tải blob về máy (dùng khi bạn muốn bật xuất DOCX thêm) -->
-  <script src="https://unpkg.com/file-saver@2.0.5/dist/FileSaver.min.js"></script>
-
-  <!-- Mammoth: DOCX -> HTML (chạy trên trình duyệt) -->
   <script src="https://unpkg.com/mammoth@1.6.0/mammoth.browser.min.js"></script>
-  <!-- html2pdf: HTML => PDF -->
   <script src="https://unpkg.com/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
 
   <script src="./app.js"></script>

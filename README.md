@@ -1,34 +1,21 @@
-# DOCX Form Web (GitHub Pages) — Xuất PDF
+# Điền khung → Xuất PDF (không hiện Xem trước)
 
-Web tĩnh: nhập dữ liệu → thay placeholder `(1)...(17)` trong **template.docx** → **xuất PDF**.
+## Đúng yêu cầu của bạn
+- Chỉ hiện form (khung điền)
+- Dùng 1 file Word mẫu: `template.docx` (chính file bạn gửi)
+- Bấm Tạo -> tải PDF
 
-## Chạy thử local
-- Mở VS Code → cài extension **Live Server**
-- Right click `index.html` → **Open with Live Server**
-- Nhập form → bấm **Tạo file PDF**
+## Vì sao vẫn phải render HTML?
+GitHub Pages là web tĩnh, không có server để convert DOCX->PDF chuẩn Word.
+Bản này vẫn dùng pipeline DOCX -> HTML -> PDF, nhưng **không hiển thị** phần HTML ra màn hình.
+Đã thêm các bước chống PDF trắng:
+- render vào vùng ẩn nhưng nằm trong viewport (opacity:0)
+- đợi 2 frame + chờ ảnh load xong
+- backgroundColor trắng + ép chữ đen
 
-## Up lên GitHub và bật GitHub Pages
-1. Tạo repo mới (public)
-2. Upload tất cả file:
-   - `index.html`
-   - `style.css`
-   - `app.js`
-   - `template.docx`
-3. Vào **Settings → Pages**
-   - Source: `Deploy from a branch`
-   - Branch: `main` / folder: `/ (root)`
-
-## Cơ chế xuất PDF (quan trọng)
-GitHub Pages là web tĩnh (không có server để chạy LibreOffice).
-Vì vậy PDF được tạo theo pipeline:
-1) Tạo DOCX blob bằng cách replace placeholder trong XML (PizZip)
-2) Render DOCX → HTML trong trình duyệt (mammoth)
-3) HTML → PDF (html2pdf.js)
-
-Độ giống Word có thể lệch nhẹ tuỳ font/trình duyệt.
-
-## Android APK (dễ nhất)
-Nếu bạn muốn APK: bọc web này vào **WebView**.
-- Copy toàn bộ web vào `app/src/main/assets/`
-- WebView load: `file:///android_asset/index.html`
-- Bật `setJavaScriptEnabled(true)` và `setAllowFileAccess(true)`
+## Up GitHub Pages
+Upload vào root:
+- index.html
+- style.css
+- app.js
+- template.docx

@@ -1,20 +1,24 @@
 // app.js
-// Mục tiêu: bấm "Tạo file PDF" -> xuất PDF.
-// Cách làm (chạy tĩnh trên GitHub Pages):
-// 1) Dùng template.docx, thay placeholder (1)...(17) => tạo DOCX blob (PizZip)
-// 2) Render DOCX blob ra HTML bằng docx-preview
-// 3) Dùng html2pdf.js để xuất PDF từ HTML vừa render
-//
-// Lưu ý quan trọng:
-// - DOCX placeholder phải là chuỗi LIỀN (vd "(12)") trong file XML.
-//   Nếu Word tách ra thành nhiều đoạn (run) thì replace theo chuỗi sẽ không ăn.
+// Không hiện "Xem trước" trên UI.
+// Khi bấm Tạo PDF:
+// 1) Tải template.docx (file Word bạn gửi)
+// 2) Thay placeholder (1)…(17)
+// 3) DOCX -> HTML (mammoth) và render vào exportHost (ẩn)
+// 4) html2pdf chụp exportHost -> PDF (không trắng)
 
-let templateArrayBuffer = null; // cache template hiện tại
+let templateArrayBuffer = null;
+
 const $ = (id) => document.getElementById(id);
-const msg = (s) => { $("msg").textContent = s || ""; };
+const msg = (s) => ($("msg").textContent = s || "");
+
+function setBusy(b) {
+  $("btnGenerate").disabled = b;
+  $("btnFillDemo").disabled = b;
+  $("btnUseDefault").disabled = b;
+  $("templateFile").disabled = b;
+}
 
 function xmlEscape(str) {
-  // Tránh làm hỏng XML khi thay thế text
   return String(str)
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
@@ -22,8 +26,8 @@ function xmlEscape(str) {
 }
 
 async function loadDefaultTemplate() {
-  const res = await fetch("./template.docx");
-  if (!res.ok) throw new Error("Không tải được template.docx (check GitHub Pages / path)");
+  const res = await fetch("./template.docx", { cache: "no-store" });
+  if (!res.ok) throw new Error("Không tải được template.docx. Kiểm tra file nằm ở root repo.");
   templateArrayBuffer = await res.arrayBuffer();
   $("templateStatus").textContent = "Đang dùng: template.docx";
 }
@@ -37,10 +41,9 @@ function loadTemplateFromFile(file) {
   });
 }
 
-function getFormData() {
+function getFormMapAndName() {
   const fd = new FormData($("form"));
-
-  const data = {
+  const map = {
     "(1)": fd.get("d1"),
     "(2)": fd.get("d2"),
     "(3)": fd.get("d3"),
@@ -58,14 +61,12 @@ function getFormData() {
     "(16)": fd.get("p16"),
     "(17)": fd.get("p17"),
   };
-
-  let outName = (fd.get("outName") || "Thong-bao-thu-hoi-tai-san.pdf").trim();
+  let outName = (fd.get("outName") || "output.pdf").trim();
   if (!outName.toLowerCase().endsWith(".pdf")) outName += ".pdf";
-  return { data, outName };
+  return { map, outName };
 }
 
 function replaceInZip(zip, replacements) {
-  // Thay trong các XML thuộc "word/" (document, header, footer, ...)
   const targets = Object.keys(zip.files).filter((name) =>
     name.startsWith("word/") &&
     name.endsWith(".xml") &&
@@ -77,11 +78,7 @@ function replaceInZip(zip, replacements) {
     if (!file) continue;
 
     let xml;
-    try {
-      xml = file.asText();
-    } catch (_) {
-      continue;
-    }
+    try { xml = file.asText(); } catch { continue; }
 
     let changed = false;
     for (const [ph, value] of Object.entries(replacements)) {
@@ -95,67 +92,72 @@ function replaceInZip(zip, replacements) {
   }
 }
 
-function generateDocxBlob(arrayBuffer, replacements) {
-  const zip = new PizZip(arrayBuffer);
+async function buildFilledDocxArrayBuffer(templateAb, replacements) {
+  const zip = new PizZip(templateAb);
   replaceInZip(zip, replacements);
-
-  return zip.generate({
+  const blob = zip.generate({
     type: "blob",
     mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   });
+  return await blob.arrayBuffer();
 }
 
-async function renderDocxToHtml(docxBlob, container) {
-  container.innerHTML = ""; // clear
-  const ab = await docxBlob.arrayBuffer();
-
-  // Mammoth API: mammoth.convertToHtml({arrayBuffer})
-  if (!window.mammoth || !window.mammoth.convertToHtml) {
-    throw new Error("Không load được thư viện mammoth (DOCX->HTML)");
-  }
-
-  const result = await window.mammoth.convertToHtml({ arrayBuffer: ab }, {
-    // styleMap có thể tuỳ biến thêm nếu muốn giống Word hơn
-  });
-
-  // Mammoth trả về HTML tương đối "sạch"
-  container.innerHTML = result.value || "";
+async function docxToHtml(arrayBuffer) {
+  if (!window.mammoth?.convertToHtml) throw new Error("Không load được mammoth (DOCX->HTML).");
+  const result = await window.mammoth.convertToHtml({ arrayBuffer }, {});
+  return result.value || "<p>(Trống)</p>";
 }
 
-async function exportHtmlToPdf(container, filename) {
-  // html2pdf options
+async function renderHidden(html) {
+  const host = $("exportHost");
+  host.innerHTML = html;
+
+  // đợi render xong (2 frame) để tránh html2canvas chụp trắng
+  await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+  // Nếu có ảnh, chờ ảnh load xong
+  const imgs = Array.from(host.querySelectorAll("img"));
+  await Promise.all(imgs.map(img => {
+    if (img.complete) return Promise.resolve();
+    return new Promise(res => { img.onload = res; img.onerror = res; });
+  }));
+}
+
+async function exportPdf(filename) {
+  const host = $("exportHost");
+
   const opt = {
-    margin:       [10, 10, 10, 10], // mm
+    margin:       [10, 10, 10, 10],
     filename:     filename,
     image:        { type: "jpeg", quality: 0.98 },
-    html2canvas:  { scale: 2, useCORS: true },
-    jsPDF:        { unit: "mm", format: "a4", orientation: "portrait" }
+    html2canvas:  { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
+    jsPDF:        { unit: "mm", format: "a4", orientation: "portrait" },
+    pagebreak:    { mode: ["css", "legacy"] }
   };
 
-  // html2pdf() trả Promise
-  await html2pdf().set(opt).from(container).save();
+  await html2pdf().set(opt).from(host).save();
+  // clear để nhẹ máy
+  host.innerHTML = "";
 }
 
-function setBusy(isBusy) {
-  $("btnGenerate").disabled = isBusy;
-  $("btnFillDemo").disabled = isBusy;
-  $("btnUseDefault").disabled = isBusy;
-  $("templateFile").disabled = isBusy;
-}
-
+// ===== UI wiring =====
 (async function init() {
   try {
     await loadDefaultTemplate();
+    msg("Sẵn sàng");
   } catch (e) {
-    $("templateStatus").textContent = "Chưa tải được template.docx (bạn vẫn có thể chọn file mẫu ở trên)";
+    msg("Chưa tải được template.docx. Bạn có thể chọn template bằng file.");
   }
 
   $("btnUseDefault").addEventListener("click", async () => {
     try {
+      setBusy(true);
       await loadDefaultTemplate();
       msg("OK: dùng template.docx");
     } catch (e) {
-      msg(e.message);
+      msg("Lỗi: " + (e?.message || e));
+    } finally {
+      setBusy(false);
     }
   });
 
@@ -163,19 +165,20 @@ function setBusy(isBusy) {
     const f = ev.target.files?.[0];
     if (!f) return;
     try {
+      setBusy(true);
       templateArrayBuffer = await loadTemplateFromFile(f);
-      $("templateStatus").textContent = `Đang dùng: ${f.name}`;
-      msg("OK: đã nạp template từ máy bạn");
+      $("templateStatus").textContent = "Đang dùng: " + f.name;
+      msg("OK: đã nạp template");
     } catch (e) {
-      msg(e.message);
+      msg("Lỗi: " + (e?.message || e));
+    } finally {
+      setBusy(false);
     }
   });
 
   $("btnFillDemo").addEventListener("click", () => {
     const form = $("form");
     const set = (name, v) => (form.querySelector(`[name="${name}"]`).value = v);
-
-    // Demo (bạn có thể sửa cho đúng dữ liệu thật của bạn)
     set("d1", "05"); set("d2", "11"); set("d3", "2025");
     set("p4", "Nguyễn Văn Thanh");
     set("p5", "Kv Lân Thạnh 1, Phường Trung Kiên, Quận Thốt Nốt, Thành Phố Cần Thơ");
@@ -190,42 +193,30 @@ function setBusy(isBusy) {
     set("p15", "Lê Phước Hữu");
     set("p16", "Trưởng nhóm Khai thác tài sản");
     set("p17", "0913788134");
-    set("outName", "Thong-bao-thu-hoi-tai-san.pdf");
-
     msg("Đã điền demo");
   });
 
   $("form").addEventListener("submit", async (ev) => {
     ev.preventDefault();
-    msg("");
-
-    if (!templateArrayBuffer) {
-      msg("Chưa có template. Hãy chọn file template .docx hoặc dùng template.docx");
-      return;
-    }
-
-    const { data, outName } = getFormData();
-    const renderArea = $("renderArea");
-
     try {
       setBusy(true);
-      msg("Đang tạo DOCX…");
-      const docxBlob = generateDocxBlob(templateArrayBuffer, data);
+      msg("Đang tạo PDF…");
 
-      msg("Đang render DOCX…");
-      await renderDocxToHtml(docxBlob, renderArea);
+      if (!templateArrayBuffer) throw new Error("Chưa có template. Hãy bấm 'Dùng template.docx' hoặc chọn file template.");
 
-      msg("Đang xuất PDF…");
-      await exportHtmlToPdf(renderArea, outName);
+      const { map, outName } = getFormMapAndName();
+      const filledAb = await buildFilledDocxArrayBuffer(templateArrayBuffer, map);
 
+      const html = await docxToHtml(filledAb);
+      await renderHidden(html);
+
+      await exportPdf(outName);
       msg("Xong: đã tải PDF");
     } catch (e) {
       console.error(e);
-      msg("Lỗi xuất PDF: " + (e?.message || e));
+      msg("Lỗi: " + (e?.message || e));
     } finally {
       setBusy(false);
-      // tránh giữ DOM nặng
-      renderArea.innerHTML = "";
     }
   });
 })();
