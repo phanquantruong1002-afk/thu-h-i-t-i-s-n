@@ -28,7 +28,7 @@ button:hover { border-color: #3a3f4b; }
 }
 
 
-/* ===== ver 0.7: chống PDF trắng =====
+/* ===== ver 0.8: chống PDF trắng =====
    html2canvas thường chụp TRẮNG nếu element có opacity:0 hoặc bị đẩy quá xa viewport.
    Cách mới:
    - exportHost luôn render "hiện" (opacity:1), nằm trong viewport
@@ -92,3 +92,19 @@ button:hover { border-color: #3a3f4b; }
   color: #e8e8ea;
 }
 .btnCancel:hover { border-color:#3a3f4b; }
+
+
+/* ver 0.8: In ra PDF ngay trong cùng trang (không popup) */
+body.printing .container { display: none !important; }
+body.printing .exportHost {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  z-index: 99999 !important;
+  position: static !important;
+  margin: 0 auto !important;
+}
+@media print {
+  body { background: #fff !important; }
+  .loadingOverlay { display: none !important; }
+  .exportHost { position: static !important; }
+}

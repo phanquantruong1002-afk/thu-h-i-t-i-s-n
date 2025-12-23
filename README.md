@@ -21,7 +21,7 @@ Upload vào root:
 - template.docx
 
 ---
-ver 0.6: nút Tạo PDF dùng Print/Save as PDF (ổn định trên Cốc Cốc). Có nút 'Tải PDF (thử)' cho Chrome/Edge.
+ver 0.8: Tạo PDF dùng Print ngay trong cùng tab (không popup) + tăng timeout DOCX->HTML để tránh treo trên Cốc Cốc.
 
 ---
-ver 0.7: thêm cache-busting (?v=0.7) cho style/app/template để GitHub Pages cập nhật ngay, tránh bị cache.
+ver 0.8: Tạo PDF dùng Print ngay trong cùng tab (không popup) + tăng timeout DOCX->HTML để tránh treo trên Cốc Cốc.

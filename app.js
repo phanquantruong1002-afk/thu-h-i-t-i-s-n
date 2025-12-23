@@ -1,5 +1,5 @@
 // app.js
-const APP_VERSION = "0.7";
+const APP_VERSION = "0.8";
 
 // Không hiện "Xem trước" trên UI.
 // Khi bấm Tạo PDF:
@@ -251,6 +251,22 @@ function printToPdf(filename){
   w.document.close();
 }
 
+
+function printSameWindow(){
+  // In ra PDF bằng hộp thoại Print của trình duyệt ngay trong tab hiện tại (không popup).
+  return new Promise((resolve) => {
+    const done = () => {
+      window.removeEventListener("afterprint", done);
+      document.body.classList.remove("printing");
+      resolve();
+    };
+    window.addEventListener("afterprint", done);
+    document.body.classList.add("printing");
+    // delay 1 tick để CSS apply
+    setTimeout(() => window.print(), 50);
+  });
+}
+
 // ===== UI wiring =====
 (async function init() {
   const cancelBtn = document.getElementById('btnCancel');
@@ -321,11 +337,11 @@ function printToPdf(filename){
       const { map, outName } = getFormMapAndName();
       setOverlayText("Đang áp placeholder…");
       const filledAb = await buildFilledDocxArrayBuffer(templateArrayBuffer, map);
-      const html = await withTimeout(docxToHtml(filledAb), 20000, "DOCX->HTML");
-      await withTimeout(renderHidden(html), 8000, "Render");
+      const html = await withTimeout(docxToHtml(filledAb), 60000, "DOCX->HTML");
+      await withTimeout(renderHidden(html), 15000, "Render");
       setOverlayText("Đang mở hộp thoại In…");
       showOverlay(false);
-      printToPdf(outName);
+      await printSameWindow();
     } catch(e){
       console.error(e);
       msg("Lỗi: " + (e?.message || e));
@@ -343,8 +359,8 @@ function printToPdf(filename){
       const { map, outName } = getFormMapAndName();
       setOverlayText("Đang áp placeholder…");
       const filledAb = await buildFilledDocxArrayBuffer(templateArrayBuffer, map);
-      const html = await withTimeout(docxToHtml(filledAb), 20000, "DOCX->HTML");
-      await withTimeout(renderHidden(html), 8000, "Render");
+      const html = await withTimeout(docxToHtml(filledAb), 60000, "DOCX->HTML");
+      await withTimeout(renderHidden(html), 15000, "Render");
       setOverlayText("Đang mở hộp thoại In…");
       await exportPdf(outName);
       showOverlay(false);
@@ -370,12 +386,12 @@ $("form").addEventListener("submit", async (ev) => {
       const { map, outName } = getFormMapAndName();
       const filledAb = await buildFilledDocxArrayBuffer(templateArrayBuffer, map);
 
-      const html = await withTimeout(docxToHtml(filledAb), 20000, "DOCX->HTML");
-      await withTimeout(renderHidden(html), 8000, "Render");
+      const html = await withTimeout(docxToHtml(filledAb), 60000, "DOCX->HTML");
+      await withTimeout(renderHidden(html), 15000, "Render");
       setOverlayText("Đang mở hộp thoại In…");
 
       showOverlay(false);
-      printToPdf(outName);
+      await printSameWindow();
       msg("Đã mở hộp thoại In. Chọn Save as PDF để tải.");
     } catch (e) {
       console.error(e);
