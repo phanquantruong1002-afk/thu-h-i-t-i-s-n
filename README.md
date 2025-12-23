@@ -21,4 +21,4 @@ Upload vào root:
 - template.docx
 
 ---
-ver 0.3: dùng outputPdf(blob) + anchor download + timeout để tránh treo/blank trên Cốc Cốc.
+ver 0.5: thêm timeout + hiển thị tiến trình + fallback In ra PDF (print) để không bị treo/blank trên Cốc Cốc.

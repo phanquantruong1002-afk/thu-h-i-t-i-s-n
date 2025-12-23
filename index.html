@@ -57,6 +57,7 @@
 
         <div class="row">
           <button id="btnGenerate" type="submit">Tạo PDF</button>
+          <button id="btnPrintPdf" type="button">In ra PDF (Print)</button>
           <button id="btnFillDemo" type="button">Điền demo</button>
           <span id="msg" class="status"></span>
         </div>
@@ -66,7 +67,7 @@
     <footer class="footer">
       <p>
         Ghi chú: GitHub Pages là web tĩnh nên PDF được tạo theo cách <b>DOCX → HTML (mammoth) → PDF (html2pdf)</b>.
-        Nếu bạn cần PDF giống Word 100% (giữ nguyên layout/phông/bảng), bắt buộc phải có <b>server</b> convert (LibreOffice/OnlyOffice). <span class="ver">ver 0.3</span></p>
+        Nếu bạn cần PDF giống Word 100% (giữ nguyên layout/phông/bảng), bắt buộc phải có <b>server</b> convert (LibreOffice/OnlyOffice). <span class="ver">ver 0.5</span></p>
     </footer>
   </div>
 
@@ -77,15 +78,18 @@
   <div id="loadingOverlay" class="loadingOverlay" hidden>
     <div class="loadingBox">
       <div class="spinner"></div>
-      <div>Đang tạo PDF…</div>
+      <div id="overlayText">Đang tạo PDF…</div>
+      <button id="btnCancel" type="button" class="btnCancel">Hủy</button>
     </div>
   </div>
 
   <!-- Libs -->
   <script src="https://unpkg.com/pizzip@3.1.5/dist/pizzip.min.js"></script>
   <script src="https://unpkg.com/mammoth@1.6.0/mammoth.browser.min.js"></script>
-  <script src="https://unpkg.com/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
 
-  <script src="./app.js"></script>
+  <!-- html2canvas + jsPDF: chụp DOM -> PDF (ổn định hơn html2pdf trên một số trình duyệt) -->
+  <script src="https://unpkg.com/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="./app.js"></script>
 </body>
 </html>
