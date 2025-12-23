@@ -1,5 +1,5 @@
 // app.js
-const APP_VERSION = "0.9";
+const APP_VERSION = "1.0";
 
 // Không hiện "Xem trước" trên UI.
 // Khi bấm Tạo PDF:
@@ -32,8 +32,7 @@ function withTimeout(promise, ms, label){
 function showOverlay(show) {
   const ov = document.getElementById("loadingOverlay");
   if (!ov) return;
-  if (show) ov.hidden = false;
-  else ov.hidden = true;
+  ov.hidden = !show;
 }
 
 function setBusy(b) {
