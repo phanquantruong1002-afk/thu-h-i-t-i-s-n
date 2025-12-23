@@ -17,19 +17,7 @@ button { padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line);
 button:hover { border-color: #3a3f4b; }
 .span2 { grid-column: span 2; }
 
-.exportHost {
-  position: fixed;
-  left: 0;
-  top: 0;
-  width: 794px;          /* ~A4 @ 96dpi */
-  min-height: 1123px;
-  background: #fff;
-  padding: 28px 32px;
-  opacity: 0;            /* ẩn nhưng vẫn render trong layout */
-  pointer-events: none;
-  z-index: -1;
-}
-.exportHost * { color: #000 !important; }
+
 .exportHost p { margin: 0 0 8px; line-height: 1.45; }
 .exportHost table { width: 100%; border-collapse: collapse; }
 .exportHost td, .exportHost th { border: 1px solid #ddd; padding: 6px; }
@@ -38,3 +26,58 @@ button:hover { border-color: #3a3f4b; }
   .grid { grid-template-columns: 1fr; }
   .span2 { grid-column: auto; }
 }
+
+
+/* ===== ver 0.2: chống PDF trắng =====
+   html2canvas thường chụp TRẮNG nếu element có opacity:0 hoặc bị đẩy quá xa viewport.
+   Cách mới:
+   - exportHost luôn render "hiện" (opacity:1), nằm trong viewport
+   - Khi xuất PDF, bật overlay che toàn màn hình để người dùng không thấy exportHost */
+.exportHost {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 794px;          /* ~A4 @ 96dpi */
+  min-height: 1123px;
+  background: #fff;
+  padding: 28px 32px;
+  opacity: 1;
+  pointer-events: none;
+  z-index: 0;
+}
+.exportHost * { color: #000 !important; }
+.exportHost p { margin: 0 0 8px; line-height: 1.45; }
+.exportHost table { width: 100%; border-collapse: collapse; }
+.exportHost td, .exportHost th { border: 1px solid #ddd; padding: 6px; }
+
+.loadingOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.72);
+  display: grid;
+  place-items: center;
+  z-index: 9999;
+}
+.loadingBox {
+  background: #14161d;
+  border: 1px solid #2a2d36;
+  border-radius: 14px;
+  padding: 14px 16px;
+  color: #e8e8ea;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-size: 14px;
+}
+.spinner {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: 2px solid #2a2d36;
+  border-top-color: #e8e8ea;
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.ver { opacity: .9; }

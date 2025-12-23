@@ -66,13 +66,20 @@
     <footer class="footer">
       <p>
         Ghi chú: GitHub Pages là web tĩnh nên PDF được tạo theo cách <b>DOCX → HTML (mammoth) → PDF (html2pdf)</b>.
-        Nếu bạn cần PDF giống Word 100% (giữ nguyên layout/phông/bảng), bắt buộc phải có <b>server</b> convert (LibreOffice/OnlyOffice).
-      </p>
+        Nếu bạn cần PDF giống Word 100% (giữ nguyên layout/phông/bảng), bắt buộc phải có <b>server</b> convert (LibreOffice/OnlyOffice). <span class="ver">ver 0.2</span></p>
     </footer>
   </div>
 
   <!-- Vùng render ẩn để xuất PDF (không hiển thị) -->
   <div id="exportHost" class="exportHost" aria-hidden="true"></div>
+
+  <!-- Overlay che màn hình khi xuất PDF (để exportHost có thể "hiện" mà người dùng không thấy) -->
+  <div id="loadingOverlay" class="loadingOverlay" hidden>
+    <div class="loadingBox">
+      <div class="spinner"></div>
+      <div>Đang tạo PDF…</div>
+    </div>
+  </div>
 
   <!-- Libs -->
   <script src="https://unpkg.com/pizzip@3.1.5/dist/pizzip.min.js"></script>

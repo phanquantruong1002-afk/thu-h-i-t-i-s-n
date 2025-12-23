@@ -1,4 +1,6 @@
 // app.js
+const APP_VERSION = "0.2";
+
 // Không hiện "Xem trước" trên UI.
 // Khi bấm Tạo PDF:
 // 1) Tải template.docx (file Word bạn gửi)
@@ -10,6 +12,14 @@ let templateArrayBuffer = null;
 
 const $ = (id) => document.getElementById(id);
 const msg = (s) => ($("msg").textContent = s || "");
+
+
+function showOverlay(show) {
+  const ov = document.getElementById("loadingOverlay");
+  if (!ov) return;
+  if (show) ov.hidden = false;
+  else ov.hidden = true;
+}
 
 function setBusy(b) {
   $("btnGenerate").disabled = b;
@@ -157,6 +167,7 @@ async function exportPdf(filename) {
     } catch (e) {
       msg("Lỗi: " + (e?.message || e));
     } finally {
+      showOverlay(false);
       setBusy(false);
     }
   });
@@ -172,6 +183,7 @@ async function exportPdf(filename) {
     } catch (e) {
       msg("Lỗi: " + (e?.message || e));
     } finally {
+      showOverlay(false);
       setBusy(false);
     }
   });
@@ -201,6 +213,7 @@ async function exportPdf(filename) {
     try {
       setBusy(true);
       msg("Đang tạo PDF…");
+      showOverlay(true);
 
       if (!templateArrayBuffer) throw new Error("Chưa có template. Hãy bấm 'Dùng template.docx' hoặc chọn file template.");
 
@@ -216,6 +229,7 @@ async function exportPdf(filename) {
       console.error(e);
       msg("Lỗi: " + (e?.message || e));
     } finally {
+      showOverlay(false);
       setBusy(false);
     }
   });

@@ -19,3 +19,6 @@ Upload vào root:
 - style.css
 - app.js
 - template.docx
+
+---
+ver 0.2: sửa lỗi PDF trắng bằng overlay + exportHost không opacity 0.
