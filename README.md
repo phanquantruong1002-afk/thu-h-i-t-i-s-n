@@ -21,7 +21,7 @@ Upload vào root:
 - template.docx
 
 ---
-ver 0.8: Tạo PDF dùng Print ngay trong cùng tab (không popup) + tăng timeout DOCX->HTML để tránh treo trên Cốc Cốc.
+ver 0.9: Ẩn trang trắng/khối xám khi tạo PDF (overlay đen 100%, exportHost visibility:hidden và chỉ hiện khi in).
 
 ---
-ver 0.8: Tạo PDF dùng Print ngay trong cùng tab (không popup) + tăng timeout DOCX->HTML để tránh treo trên Cốc Cốc.
+ver 0.9: Ẩn trang trắng/khối xám khi tạo PDF (overlay đen 100%, exportHost visibility:hidden và chỉ hiện khi in).

@@ -1,5 +1,5 @@
 // app.js
-const APP_VERSION = "0.8";
+const APP_VERSION = "0.9";
 
 // Không hiện "Xem trước" trên UI.
 // Khi bấm Tạo PDF:
@@ -140,6 +140,7 @@ async function renderHidden(html) {
 
   const host = $("exportHost");
   host.innerHTML = html;
+  host.style.visibility = "hidden";
 
   // đợi render xong (2 frame) để tránh html2canvas chụp trắng
   await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
@@ -258,6 +259,7 @@ function printSameWindow(){
     const done = () => {
       window.removeEventListener("afterprint", done);
       document.body.classList.remove("printing");
+      showOverlay(false);
       resolve();
     };
     window.addEventListener("afterprint", done);
@@ -340,7 +342,6 @@ function printSameWindow(){
       const html = await withTimeout(docxToHtml(filledAb), 60000, "DOCX->HTML");
       await withTimeout(renderHidden(html), 15000, "Render");
       setOverlayText("Đang mở hộp thoại In…");
-      showOverlay(false);
       await printSameWindow();
     } catch(e){
       console.error(e);
@@ -390,7 +391,6 @@ $("form").addEventListener("submit", async (ev) => {
       await withTimeout(renderHidden(html), 15000, "Render");
       setOverlayText("Đang mở hộp thoại In…");
 
-      showOverlay(false);
       await printSameWindow();
       msg("Đã mở hộp thoại In. Chọn Save as PDF để tải.");
     } catch (e) {

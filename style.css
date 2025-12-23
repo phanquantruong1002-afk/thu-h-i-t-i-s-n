@@ -28,12 +28,13 @@ button:hover { border-color: #3a3f4b; }
 }
 
 
-/* ===== ver 0.8: chống PDF trắng =====
+/* ===== ver 0.9: chống PDF trắng =====
    html2canvas thường chụp TRẮNG nếu element có opacity:0 hoặc bị đẩy quá xa viewport.
    Cách mới:
    - exportHost luôn render "hiện" (opacity:1), nằm trong viewport
    - Khi xuất PDF, bật overlay che toàn màn hình để người dùng không thấy exportHost */
 .exportHost {
+  visibility: hidden;
   position: fixed;
   left: 0;
   top: 0;
@@ -53,7 +54,7 @@ button:hover { border-color: #3a3f4b; }
 .loadingOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,.72);
+  background: #000;
   display: grid;
   place-items: center;
   z-index: 9999;
@@ -97,14 +98,18 @@ button:hover { border-color: #3a3f4b; }
 /* ver 0.8: In ra PDF ngay trong cùng trang (không popup) */
 body.printing .container { display: none !important; }
 body.printing .exportHost {
+  visibility: hidden;
   opacity: 1 !important;
   pointer-events: auto !important;
   z-index: 99999 !important;
   position: static !important;
   margin: 0 auto !important;
+
+  visibility: visible !important;
 }
 @media print {
   body { background: #fff !important; }
   .loadingOverlay { display: none !important; }
-  .exportHost { position: static !important; }
+  .exportHost {
+  visibility: hidden; position: static !important; }
 }
