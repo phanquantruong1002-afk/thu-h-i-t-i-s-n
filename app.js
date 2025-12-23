@@ -217,7 +217,7 @@ function setBusy(isBusy) {
       msg("Xong: đã tải PDF");
     } catch (e) {
       console.error(e);
-      msg("Lỗi xuất PDF. Thử đổi template khác hoặc kiểm tra placeholder bị tách run trong Word.");
+      msg("Lỗi xuất PDF: " + (e?.message || e));
     } finally {
       setBusy(false);
       // tránh giữ DOM nặng

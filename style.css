@@ -40,3 +40,20 @@ code { background:#0f1117; padding:2px 6px; border:1px solid var(--line); border
 .renderArea .docx-wrapper {
   background: white !important;
 }
+
+/* ===== renderArea override (để html2canvas bắt được) =====
+   Không dùng left:-99999 nữa vì html2canvas đôi khi không chụp vùng quá xa viewport.
+   Dùng opacity:0 + z-index:-1 để ẩn nhưng vẫn render trong layout. */
+.renderArea{
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 794px;            /* xấp xỉ A4 ở 96dpi */
+  min-height: 1123px;
+  background: white;
+  color: black;
+  padding: 20px;
+  opacity: 0;
+  pointer-events: none;
+  z-index: -1;
+}
