@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tạo Thông Báo (từ mẫu .docx)</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <!--
+    ỨNG DỤNG WEB TĨNH (GitHub Pages được):
+    - Bạn nhập dữ liệu vào form
+    - App sẽ lấy template.docx (mẫu có placeholder (1)...(17)) và thay thế rồi tải về file .docx mới
+
+    Mẫu placeholder theo file edit.docx:
+    (1)(2)(3): ngày/tháng/năm tại "Hà Nội, ngày ... tháng ... năm ..."  fileciteturn1file0L5-L16
+    (4)(5)(6)(7): người nhận, địa chỉ, số HĐ, ngày HĐ              fileciteturn1file0L39-L51
+    (9)-(14): thông tin tài sản/đăng ký xe                         fileciteturn1file1L1-L4
+    (15)-(17): người liên hệ, chức vụ, di động                     fileciteturn1file2L11-L18
+  -->
+  <div class="container">
+    <header class="header">
+      <h1>Tạo văn bản từ mẫu (DOCX)</h1>
+      <p class="sub">
+        Dùng mẫu <b>template.docx</b> (giống “file edit.docx”). Khi bấm <b>Tạo file</b>, web sẽ tải về docx mới (giống “file mau.docx”). fileciteturn1file3L13-L50
+      </p>
+    </header>
+
+    <section class="card">
+      <h2>1) Chọn mẫu (tuỳ chọn)</h2>
+      <p class="hint">
+        Mặc định web dùng <code>template.docx</code> trong repo. Nếu bạn có mẫu khác (cũng dùng (1)...(17)) thì chọn ở đây.
+      </p>
+      <input id="templateFile" type="file" accept=".docx" />
+      <div class="row">
+        <button id="btnUseDefault" type="button">Dùng template.docx mặc định</button>
+        <span id="templateStatus" class="status">Đang dùng: template.docx</span>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>2) Nhập dữ liệu</h2>
+
+      <form id="form">
+        <div class="grid">
+          <label>(1) Ngày <input name="d1" placeholder="05" required></label>
+          <label>(2) Tháng <input name="d2" placeholder="11" required></label>
+          <label>(3) Năm <input name="d3" placeholder="2025" required></label>
+
+          <label>(4) Kính gửi (Ông/Bà) <input name="p4" placeholder="Nguyễn Văn Thanh" required></label>
+          <label class="span2">(5) Địa chỉ <input name="p5" placeholder="Kv Lân Thạnh 1, ..." required></label>
+
+          <label>(6) Số hợp đồng <input name="p6" placeholder="20285167926" required></label>
+          <label>(7) Ngày hợp đồng (dd/mm/yyyy) <input name="p7" placeholder="24/02/2022" required></label>
+
+          <label class="span2">(9) Tài sản (mô tả xe) <input name="p9" placeholder="HONDA VariO - Click (Nhập khẩu) 150cc Fi 2020" required></label>
+          <label>(10) Số khung <input name="p10" placeholder="4125LK052645" required></label>
+          <label>(11) Số máy <input name="p11" placeholder="KF41E2056854" required></label>
+          <label>(12) Biển số <input name="p12" placeholder="65F1-645.46" required></label>
+
+          <label>(13) Số đăng ký xe <input name="p13" placeholder="058656" required></label>
+          <label>(14) Ngày cấp đăng ký (dd/mm/yyyy) <input name="p14" placeholder="04/12/2020" required></label>
+
+          <label>(15) Người liên hệ <input name="p15" placeholder="Lê Phước Hữu" required></label>
+          <label class="span2">(16) Chức vụ <input name="p16" placeholder="Trưởng nhóm Khai thác tài sản" required></label>
+          <label>(17) Di động <input name="p17" placeholder="0913788134" required></label>
+
+          <label class="span2">Tên file xuất ra <input name="outName" placeholder="Thong-bao-thu-hoi-tai-san.docx"></label>
+        </div>
+
+        <div class="row">
+          <button id="btnGenerate" type="submit">Tạo file DOCX</button>
+          <button id="btnFillDemo" type="button">Điền demo (giống file mau)</button>
+          <span id="msg" class="status"></span>
+        </div>
+      </form>
+    </section>
+
+    <footer class="footer">
+      <p>
+        Lưu ý: App thay thế trực tiếp chuỗi <code>(1)...(17)</code> trong các file XML của DOCX.
+        Nếu bạn sửa mẫu và làm placeholder bị tách lẻ ký tự (vd “(” “1” “)”), app có thể không thay được.
+      </p>
+    </footer>
+  </div>
+
+  <!-- PizZip: đọc/ghi docx (docx là file zip) -->
+  <script src="https://unpkg.com/pizzip@3.1.5/dist/pizzip.min.js"></script>
+  <!-- FileSaver: tải blob về máy -->
+  <script src="https://unpkg.com/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+
+  <script src="./app.js"></script>
+</body>
+</html>
